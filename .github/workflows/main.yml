@@ -1,0 +1,39 @@
+name: .NET 8 CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+         NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: vradarserver/vrscore.git
+          path: .
+          ref: master
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+          
+      - name: Restore dependencies
+        run: dotnet restore --locked-mode --packages packs VirtualRadar.sln
+
+      - name: Build project
+        run: ./build solution
+
+      - name: compress
+        run: Compress-Archive . release.zip
+
+      - name: upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vrscore
+          path:  D:/a/stl63/stl63/release.zip
